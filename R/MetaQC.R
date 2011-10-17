@@ -4,7 +4,9 @@
 ### nCores : how many cores will be used (default: all in unix-like os and 2 in windows)
 ### useCache : if save GList as cache for next use (default: TRUE)
 ### filterGenes : whether to use gene filtering (recommended to reduce dimension for fast computation)
-MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, filterGenes=TRUE, verbose=FALSE) {
+MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, filterGenes=TRUE, 
+		maxNApctAllowed=.3, cutRatioByMean=.4, cutRatioByVar=.4, minNumGenes=5,
+		verbose=FALSE) {
 	.p <- proto(expr = {
 				.verbose <- verbose
 				.Names <- names(DList)
@@ -14,17 +16,17 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 				.excluded <- NULL
 				.GList <- NULL
 				.GListIdx <- NULL
-				.cutRatioByMean <- .4
-				.cutRatioByVar <- .4
-				.minNumGenes <- 5
+				.cutRatioByMean <- cutRatioByMean
+				.cutRatioByVar <- cutRatioByVar
+				.minNumGenes <- minNumGenes
 				.isParallel <- isParallel
 				.useCache <- useCache
 				.method.cor <- "pearson"
-				.l.norm <- 2 
+				.l.norm <- 2
 				.PvalOfScores <- NULL #-log pval of scores
 				.DistOfStudies <- NULL
 				.IScores <- NULL
-				.maxNApctAllowed <- .3
+				.maxNApctAllowed <- maxNApctAllowed
 				.PValList <- NULL
 				.PValMat <- NULL
 				.PValMat0 <- NULL
@@ -331,7 +333,7 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 								.gMatched <- sort(match(.gnInPath, rownames(.$.PValMat0)))
 								.pvInPath <- .$.PValMat0[.gMatched,ii]
 								.pvOutPath <- na.omit(.$.PValMat0[-.gMatched,ii])
-								ks.test(.pvInPath, .pvOutPath, alternative="greater")$p
+								suppressWarnings(ks.test(.pvInPath, .pvOutPath, alternative="greater")$p)
 							}
 							names(.PathPVal) <- names(.GListIdx[[ii]])
 							return(.PathPVal)
@@ -416,7 +418,8 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 					if(!file.exists(fileForCQCp)) {
 						res <- Download("MetaQC",fileForCQCp)
 						if (inherits(res, "try-error") | res != 0L) 
-							stop(gettextf("download of file '%s' failed!\nPlease download gmt files at http://www.broadinstitute.org/gsea/downloads.jsp", fn))
+							file.remove(fileForCQCp)
+							stop(gettextf("download of file '%s' failed!\nPlease download gmt files at http://www.broadinstitute.org/gsea/downloads.jsp", fileForCQCp))
 					}
 					
 					.GList <- paste(sub("(.+)[.][^.]+$", "\\1", basename(fileForCQCp)),".rda",sep="")
@@ -555,22 +558,25 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 				}
 			})
 	
-	if(!file.exists(GList)) {
-		res <- Download("MetaQC",GList)
-		if (inherits(res, "try-error") | res != 0L) 
-			stop(gettextf("download of file '%s' failed!\nPlease download gmt files at http://www.broadinstitute.org/gsea/downloads.jsp", fn))
-	}
-	
-	if(getFileExt(GList)=="gmt") {
-		.GList <- paste(getFileName(GList),".rda",sep="")
-		if(useCache & file.exists(.GList))
-			load(.GList) #loaded as GList
-		else
-			GList <- GMT2List(GList, saveAs=.GList)
-	} else { 
-		stopifnot(is.list(GList)) #GList should be a list of gene sets
+	if(is.list(GList)) { #GList should be a list of gene sets
 		stopifnot(all(length(names(GList))>0) & all(!duplicated(names(GList))))   #must be a pathway name & unique
 		stopifnot(all(sapply(GList, is.character)))	#all genes should be a character vector	
+	} else {
+		if(!file.exists(GList)) {
+			res <- Download("MetaQC",GList)
+			if (inherits(res, "try-error") | res != 0L) {
+				file.remove(GList)	
+				stop(gettextf("download of file '%s' failed!\nPlease download gmt files at http://www.broadinstitute.org/gsea/downloads.jsp", GList))
+			} 
+		}
+		
+		if(getFileExt(GList)=="gmt") {
+			.GList <- paste(getFileName(GList),".rda",sep="")
+			if(useCache & file.exists(.GList))
+				load(.GList) #loaded as GList
+			else
+				GList <- GMT2List(GList, saveAs=.GList)
+		}
 	}
 	
 	.p$.Initialize(.DList=DList, .GList=GList, .filterGenes=filterGenes)

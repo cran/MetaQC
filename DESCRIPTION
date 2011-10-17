@@ -2,7 +2,7 @@ Package: MetaQC
 Type: Package
 Title: MetaQC: Objective Quality Control and Inclusion/Exclusion
         Criteria for Genomic Meta-Analysis
-Version: 0.1.5
+Version: 0.1.6
 Author: Don Kang <donkang75@gmail.com> and George Tseng
         <ctseng@pitt.edu>
 Maintainer: Don Kang <donkang75@gmail.com>
@@ -32,7 +32,7 @@ License: GPL-2
 URL: https://github.com/donkang75/MetaQC
 LazyLoad: yes
 Collate: MetaQC.R requireAll.R functions.R runQC.R cleanup.R
-Date: 2011-06-15
-Packaged: 2011-06-15 16:26:15 UTC; don
+Date: 2011-10-17
+Packaged: 2011-10-17 19:08:40 UTC; don
 Repository: CRAN
-Date/Publication: 2011-06-15 18:49:58
+Date/Publication: 2011-10-18 05:59:12
