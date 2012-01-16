@@ -113,10 +113,9 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 						.d <- .DListF[[i]]
 						.isNA <- any(is.na(.d))
 						
-						.pathMat <- foreach(g=iter(.$.GListIdx[[i]]), .combine=cbind) %dopar% {
-							.pathVec <- rep(0,nrow(.d))
-							.pathVec[g] <- 1
-							return(.pathVec)
+						.pathMat <- matrix(0, nrow(.d), length(.$.GListIdx[[i]]))
+						for(jj in 1:ncol(.pathMat)) {
+							.pathMat[.$.GListIdx[[i]][[jj]], jj] <- 1
 						}
 						rownames(.pathMat) <- 1:nrow(.d) 
 						colnames(.pathMat) <- names(.$.GListIdx[[i]])
@@ -139,6 +138,7 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 						}
 						names(.pathList) <- sapply(.pathList,length)
 						
+						#performance significantly degraded by length of .pathList, which is the number of unique pathway sizes
 						.ScoresNullDist <- foreach(b=1:.B, .combine=rbind, .export="printLog") %dopar% {
 							
 							.g <- sample(nrow(.pathMat))							
@@ -301,7 +301,7 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 						.dat <- .dat[rowSums(!is.na(.dat))>=3,]
 						.reduced  <- GetEWPval(.dat[,-i])
 						.obs <-  .dat[,i]
-						cor.test(.reduced, .obs, method="spearman", alternative="g")$p.value
+						suppressWarnings(cor.test(.reduced, .obs, method="spearman", alternative="g")$p.value)
 					}
 					names(.$.CQCgScores) <- colnames(.PValMat)
 					.$.CQCgScores <- ifelse(.$.CQCgScores < .Machine$double.xmin, .Machine$double.xmin, .$.CQCgScores)
@@ -356,7 +356,7 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 						.dat <- .dat[rowSums(!is.na(.dat))>=3,]
 						.reduced  <- GetEWPval(.dat[,-i])
 						.obs <-  .dat[,i]
-						cor.test(.reduced, .obs, method="spearman")$p.value
+						suppressWarnings(cor.test(.reduced, .obs, method="spearman")$p.value)
 					}
 					names(.$.CQCpScores) <- colnames(.PathPValMat)
 					.$.CQCpScores <- ifelse(.$.CQCpScores < .Machine$double.xmin, .Machine$double.xmin, .$.CQCpScores)
@@ -417,9 +417,10 @@ MetaQC <- function(DList, GList, isParallel=FALSE, nCores=NULL, useCache=TRUE, f
 				RunQC <- function(., nPath=NULL, B=1e4, pvalCut=.05, pvalAdjust=FALSE, fileForCQCp="c2.all.v3.0.symbols.gmt", isCAQC=FALSE) {
 					if(!file.exists(fileForCQCp)) {
 						res <- Download("MetaQC",fileForCQCp)
-						if (inherits(res, "try-error") | res != 0L) 
+						if (inherits(res, "try-error") | res != 0L) {
 							file.remove(fileForCQCp)
 							stop(gettextf("download of file '%s' failed!\nPlease download gmt files at http://www.broadinstitute.org/gsea/downloads.jsp", fileForCQCp))
+						} 
 					}
 					
 					.GList <- paste(sub("(.+)[.][^.]+$", "\\1", basename(fileForCQCp)),".rda",sep="")
