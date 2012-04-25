@@ -14,12 +14,12 @@ For each quality control index, the p-values from statistical hypothesis testing
 MetaQC(DList, GList, isParallel = FALSE, nCores = NULL, 
 	useCache = TRUE, filterGenes = TRUE, 
 	maxNApctAllowed=.3, cutRatioByMean=.4, cutRatioByVar=.4, minNumGenes=5,
-	verbose = FALSE)
+	verbose = FALSE, resp.type = c("Twoclass", "Multiclass", "Survival"))
 }
 
 \arguments{
   \item{DList}{
-A list of all data matrices; Each data name should be set as the name of each list element. Each data should be a numeric matrix that has genes in the rows and samples in the columns. Row names should be official gene symbols and column names be class labels (currently, only two classes are supported).
+Either a list of all data matrices (Case 1) or a list of lists (Case 2); The first case is simplified input data structure only for two classes comparison. Each data name should be set as the name of each list element. Each data should be a numeric matrix that has genes in the rows and samples in the columns. Row names should be official gene symbols and column names be class labels. For the full description of input data, you can use the second data format. Each data is represented as a list which should have x, y, and geneid (geneid can be replaced to row names of matrix x) elements, representing expression data, outcome or class labels, and gene ids, respectively. Additionally, in the survival analysis, censoring.status should be set.   
 }
   \item{GList}{
 The location of a file which has sets of gene symbol lists such as gmt files. By default, the gmt file will be converted to list object and saved with the same name with ".rda". Alternatively, a list of gene sets is allowed; the name of each element of the list should be set as a unique pathway name, and each pathway should have a character vector of gene symbols. 
@@ -51,9 +51,9 @@ Mininum number of genes in a pathway. A pathway which has members smaller than t
   \item{verbose}{
 Whether to print out logs.
 }
+  \item{resp.type}{
+The type of response variable. Three options are: "Twoclass" (unpaired), "Multiclass", "Survival." By default, Twoclass is used
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
 A proto R object.
@@ -67,9 +67,6 @@ Dongwan D. Kang, Etienne Sibille, Naftali Kaminski, and George C. Tseng. (Nuclei
 }
 \author{
 Don Kang (donkang75@gmail.com) and George Tseng (ctseng@pitt.edu)
-}
-\note{
-%%  ~~further notes~~
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -117,7 +114,16 @@ Don Kang (donkang75@gmail.com) and George Tseng (ctseng@pitt.edu)
 			verbose=TRUE, isParallel=TRUE)
     runQC(brainQC, B=1e4, fileForCQCp="c2.all.v3.0.symbols.gmt") #B was 1e5 in the paper
     plot(brainQC)
-
+    
+	## Survival Data Example
+	#download Breast data 
+	#from https://github.com/downloads/donkang75/MetaQC/Breast.rda
+	load("Breast.rda")
+    breastQC <- MetaQC(Breast, "c2.cp.biocarta.v3.0.symbols.gmt", filterGenes=FALSE, 
+			verbose=TRUE, isParallel=TRUE, resp.type="Survival")
+    runQC(breastQC, B=1e4, fileForCQCp="c2.all.v3.0.symbols.gmt") 
+    breastQC
+    plot(breastQC)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

@@ -2,7 +2,7 @@ Package: MetaQC
 Type: Package
 Title: MetaQC: Objective Quality Control and Inclusion/Exclusion
         Criteria for Genomic Meta-Analysis
-Version: 0.1.9
+Version: 0.1.10-1
 Author: Don Kang <donkang75@gmail.com> and George Tseng
         <ctseng@pitt.edu>
 Maintainer: Don Kang <donkang75@gmail.com>
@@ -26,13 +26,14 @@ Description: MetaQC implements our proposed quantitative quality
         causes (e.g. sample size, platform, tissue collection,
         preprocessing etc) of their bad quality or irreproducibility
         for final inclustion/exclusion decision.
-Depends: R (>= 2.10.0), proto, foreach
-Suggests: doMC, doSNOW, FactoMineR, samr, matrixStats, gdata, gtools
+Depends: R (>= 2.10.0), proto, foreach, iterators
+Suggests: doMC, doSNOW, FactoMineR, matrixStats, gdata, gtools,
+        survival
 License: GPL-2
 URL: https://github.com/donkang75/MetaQC
 LazyLoad: yes
 Collate: MetaQC.R requireAll.R functions.R runQC.R cleanup.R
-Date: 2012-02-25
-Packaged: 2012-02-26 07:33:24 UTC; don
+Date: 2012-04-25
+Packaged: 2012-04-26 18:44:54 UTC; ddkang
 Repository: CRAN
-Date/Publication: 2012-02-26 16:31:52
+Date/Publication: 2012-04-27 06:13:30

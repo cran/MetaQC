@@ -35,9 +35,6 @@ Gene set used for CQCp calculation. Usually larger gene set is used than EQC cal
 }
 
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 A data frame showing a summary of each quality control score.
 }
@@ -46,9 +43,6 @@ Dongwan D. Kang, Etienne Sibille, Naftali Kaminski, and George C. Tseng. (Nuclei
 }
 \author{
 Don Kang (donkang75@gmail.com) and George Tseng (ctseng@pitt.edu)
-}
-\note{
-%%  ~~further notes~~
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -98,6 +92,15 @@ Don Kang (donkang75@gmail.com) and George Tseng (ctseng@pitt.edu)
     runQC(brainQC, B=1e4, fileForCQCp="c2.all.v3.0.symbols.gmt") #B was 1e5 in the paper
     plot(brainQC)
 
+	## Survival Data Example
+	#download Breast data 
+	#from https://github.com/downloads/donkang75/MetaQC/Breast.rda
+	load("Breast.rda")
+    breastQC <- MetaQC(Breast, "c2.cp.biocarta.v3.0.symbols.gmt", filterGenes=FALSE, 
+			verbose=TRUE, isParallel=TRUE, resp.type="Survival")
+    runQC(breastQC, B=1e4, fileForCQCp="c2.all.v3.0.symbols.gmt") 
+    breastQC
+    plot(breastQC)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

@@ -1,40 +1,48 @@
-GetPVal <- function(dat) {
-	group <- factor(colnames(dat))
-	if(any(is.na(dat))) {
-		p.value <- apply(dat, 1, function(x) {
-					t.test(x[which(group==levels(group)[1])], x[which(group==levels(group)[2])], var.equal=T)$p.value 
-				}) 
-	} else {
-		p.value <- t.test2(dat, group)
+GetPVal <- function(dat, resp.type=c("Twoclass", "Multiclass", "Survival")) {
+	
+	t.test2 <- function(x,y) {
+		varr <- function(x, meanx=NULL){
+			n <- ncol(x)
+			p <- nrow(x)
+			Y <-matrix(1,nrow=n,ncol=1)
+			if(is.null(meanx)){   meanx <- rowMeans(x)}
+			ans<- rep(1, p)
+			xdif <- x - meanx %*% t(Y)
+			ans <- (xdif^2) %*% rep(1/(n - 1), n)
+			ans <- drop(ans)
+			return(ans)
+		}
+		n1 <- sum(y==levels(y)[1])
+		n2 <- sum(y==levels(y)[2])
+		
+		m1 <- rowMeans(x[,y==levels(y)[1],drop=F])
+		m2 <- rowMeans(x[,y==levels(y)[2],drop=F])
+		
+		df <- n1+n2-2
+		sd <- sqrt( ((n2-1) * varr(x[, y==levels(y)[2]], meanx=m2) + (n1-1) * varr(x[, y==levels(y)[1]], meanx=m1) )*(1/n1+1/n2)/df )
+		
+		tstat <-  (m2 - m1) / sd
+		pval <- 2 * pt(-abs(tstat), df)
+		return(pval)
 	}
+	
+	if(resp.type == "Twoclass") {
+		group <- factor(dat$y)
+		if(any(is.na(dat$x))) {
+			p.value <- apply(dat$x, 1, function(x) {
+						t.test(x[which(group==levels(group)[1])], x[which(group==levels(group)[2])], var.equal=T)$p.value 
+					}) 
+		} else {
+			p.value <- t.test2(dat$x, group)
+		}
+	} else if(resp.type == "Multiclass") {
+		p.value <- apply(dat$x, 1, function(xx) summary(lm(dat$y ~ xx))$coefficients[2,4])
+	} else if(resp.type == "Survival") {
+		suppressPackageStartupMessages(require(survival))
+		p.value <- apply(dat$x, 1, function(xx) summary(coxph(Surv(dat$y, dat$censoring.status) ~ xx))$logtest['pvalue'])
+	}
+	
 	return(p.value)
-}
-
-#From SAM
-t.test2 <- function(x,y) {
-	varr <- function(x, meanx=NULL){
-		n <- ncol(x)
-		p <- nrow(x)
-		Y <-matrix(1,nrow=n,ncol=1)
-		if(is.null(meanx)){   meanx <- rowMeans(x)}
-		ans<- rep(1, p)
-		xdif <- x - meanx %*% t(Y)
-		ans <- (xdif^2) %*% rep(1/(n - 1), n)
-		ans <- drop(ans)
-		return(ans)
-	}
-	n1 <- sum(y==levels(y)[1])
-	n2 <- sum(y==levels(y)[2])
-	
-	m1 <- rowMeans(x[,y==levels(y)[1],drop=F])
-	m2 <- rowMeans(x[,y==levels(y)[2],drop=F])
-	
-	df <- n1+n2-2
-	sd <- sqrt( ((n2-1) * varr(x[, y==levels(y)[2]], meanx=m2) + (n1-1) * varr(x[, y==levels(y)[1]], meanx=m1) )*(1/n1+1/n2)/df )
-	
-	tstat <-  (m2 - m1) / sd
-	pval <- 2 * pt(-abs(tstat), df)
-	return(pval)
 }
 
 GetEWPval <- function(PDat) {
@@ -139,6 +147,3 @@ Download <- function(pkg, fn) {
 	res <- try(download.file(url, fn, mode = "wb"), silent=TRUE)
 	return(res)
 }
-
-
-
