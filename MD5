@@ -1,13 +1,13 @@
-8b66b1ab8a1a444c5d55c651e5c95ed5 *DESCRIPTION
+bb2f0c2b0ff97325faf6a583dd3effdd *DESCRIPTION
 abde996ec487191303de7c015cf694a0 *NAMESPACE
-0310db1713a5da24bbe3e6acc7cdde9d *R/MetaQC.R
+da1c0232536a474efe53f50b8f47ddd2 *R/MetaQC.R
 98f4ebfcc928281f6a0dc3c995cdf581 *R/cleanup.R
 a8ba088fc1c06fbf42e08e5e9018eac6 *R/functions.R
 c49d60d2545aff10a2f09ab49c764a33 *R/requireAll.R
 b6c2cca24c87e56bd8dd33b8e48b78af *R/runQC.R
 35fa70c4a316424b88aa1ca609d070b1 *data/brain.rda
 ef5a22d59ce52a794593a74f8447e29a *data/datalist
-7443f16f79ee2b00c2f2d229258071d0 *man/MetaQC-package.Rd
+c34129b36a1f99cea2eeea601a1e7b11 *man/MetaQC-package.Rd
 a25ddaa215c4de853b0f5a0ebd935e4a *man/MetaQC.Rd
 b5ec4431932b3841d6b5b48f90d10196 *man/brain.Rd
 6a2bac9840b60834d9cbdab9862c1dfe *man/cleanup.Rd
